@@ -57,7 +57,7 @@
   <label for="birthDate">Дата народження дитини:</label>
   <input type="date" id="birthDate" max="">
 
-  <label>Чи дитина народилась доношеною (гестаційний вік більше 36 тижнів)?</label>
+  <label>Чи дитина народилась доношеною (гестаційний вік 37 тижнів або більше)?</label>
   <select id="termSelect" onchange="toggleGestationInput()">
     <option value="">-- Оберіть варіант --</option>
     <option value="yes">Так</option>
@@ -65,8 +65,8 @@
   </select>
 
   <div id="gestationContainer" class="hidden">
-    <label for="gestationWeeks">Вкажіть термін гестації в тижнях (від 25 до 35):</label>
-    <input type="number" id="gestationWeeks" min="25" max="35">
+    <label for="gestationWeeks">Вкажіть термін гестації в тижнях (від 22 до 36):</label>
+    <input type="number" id="gestationWeeks" min="22" max="36">
   </div>
 
   <button onclick="getFormLink()">Отримати форму</button>
@@ -138,8 +138,8 @@
 
       if (termValue === "no") {
         const gestation = parseInt(gestationWeeksInput);
-        if (gestation < 25 || gestation > 35) {
-          result.textContent = "❗ Термін гестації повинен бути від 25 до 35 тижнів.";
+        if (gestation < 22 || gestation > 36) {
+          result.textContent = "❗ Термін гестації повинен бути від 22 до 36 тижнів.";
           result.style.color = "red";
           return;
         }
