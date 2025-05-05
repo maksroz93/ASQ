@@ -1,36 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Form Selector</title>
+  <title>Отримати форму</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background-color: #f4f4f4;
+    }
+    h2 {
+      color: #333;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h2>Enter Your Child's Birth Date</h2>
-  <input type="date" id="birthDate" />
-  <button onclick="getFormLink()">Get Form</button>
-  <p id="result"></p>
+
+  <h2>Введіть дату народження дитини</h2>
+  <input type="date" id="birthDate" max="">
+  <button onclick="getFormLink()">Отримати форму</button>
+  <div id="result" class="message"></div>
 
   <script>
-    function getFormLink() {
-      const birthDate = new Date(document.getElementById("birthDate").value);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+    document.getElementById('birthDate').max = new Date().toISOString().split("T")[0];
+
+    function calculateAge(birthDate, today) {
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
+
+      if (days < 0) {
+        months--;
+        const previousMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += previousMonth.getDate();
       }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const totalMonths = years * 12 + months;
+      return { months: totalMonths, days };
+    }
+
+    function getFormLink() {
+      const result = document.getElementById("result");
+      const input = document.getElementById("birthDate").value;
+
+      if (!input) {
+        result.textContent = "❗ Будь ласка, введіть дату народження.";
+        result.style.color = "red";
+        return;
+      }
+
+      const birthDate = new Date(input);
+      const today = new Date();
+      const age = calculateAge(birthDate, today);
+      const m = age.months;
+      const d = age.days;
 
       let formLink = "";
-      if (age < 2) {
-        formLink = "https://example.com/formA.html";
-      } else if (age < 5) {
-        formLink = "https://example.com/formB.html";
-      } else {
-        formLink = "https://example.com/formC.html";
-      }
 
-      document.getElementById("result").innerHTML = `<a href="${formLink}" target="_blank">Go to your form</a>`;
+      if (m === 11 && d >= 0 || (m === 12 && d <= 30)) formLink = "https://forms.gle/n9We9s4qmpydYXVF9";
+      else if (m === 13 && d >= 0 || (m === 14 && d <= 30)) formLink = "https://forms.gle/XJGEjraB856DhCnw5";
+      else if (m === 15 && d >= 0 || (m === 16 && d <= 30)) formLink = "https://forms.gle/smcoADEaJeBgLW2q8";
+      else if (m === 17 && d >= 0 || (m === 18 && d <= 30)) formLink = "https://forms.gle/LNtmR2qVWQFVbN799";
+      else if (m === 19 && d >= 0 || (m === 20 && d <= 30)) formLink = "https://forms.gle/AmLcUmFwaMVGrgdh9";
+      else if (m === 21 && d >= 0 || (m === 22 && d <= 30)) formLink = "https://forms.gle/2A7VSrUbMCfSe7By9";
+      else if ((m === 23 && d >= 0) || (m >= 24 && m <= 25 && d <= 15)) formLink = "https://forms.gle/q2rNoZA6MuXw4zDv5";
+      else if ((m === 25 && d >= 16) || (m >= 26 && m <= 28 && d <= 15)) formLink = "https://forms.gle/A6UYtaMrKN85JceLA";
+      else if ((m === 28 && d >= 16) || (m >= 29 && m <= 31 && d <= 15)) formLink = "https://forms.gle/noBJci2k1CR5JpNLA";
+      else if ((m === 31 && d >= 16) || (m >= 32 && m <= 34 && d <= 15)) formLink = "https://forms.gle/pDeZDoSGj4GtakKr8";
+      else if ((m === 34 && d >= 16) || (m >= 35 && m <= 38 && d <= 30)) formLink = "https://forms.gle/3ZUzjpwHTHYLKkvH8";
+      else if (m >= 39 && m <= 44 && d <= 30) formLink = "https://forms.gle/yuDUqudA4A57nyr16";
+      else if (m >= 45 && m <= 50 && d <= 30) formLink = "https://forms.gle/dciH5QxXEvHhwwg5A";
+      else if (m >= 51 && m <= 56 && d <= 30) formLink = "https://forms.gle/7Mog1ipWNHhrxkhx9";
+      else if (m >= 57 && m <= 66 && d <= 0) formLink = "https://forms.gle/XjmEVQpn24sfp9d59";
+
+      if (formLink) {
+        result.innerHTML = `✅ <a href="${formLink}" target="_blank">Натисніть тут, щоб перейти до форми</a>`;
+        result.style.color = "green";
+      } else {
+        result.textContent = "На жаль, немає відповідної форми для цього віку.";
+        result.style.color = "red";
+      }
     }
   </script>
+
 </body>
 </html>
