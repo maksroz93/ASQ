@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Selector</title>
+</head>
+<body>
+  <h2>Enter Your Child's Birth Date</h2>
+  <input type="date" id="birthDate" />
+  <button onclick="getFormLink()">Get Form</button>
+  <p id="result"></p>
+
+  <script>
+    function getFormLink() {
+      const birthDate = new Date(document.getElementById("birthDate").value);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      let formLink = "";
+      if (age < 2) {
+        formLink = "https://example.com/formA.html";
+      } else if (age < 5) {
+        formLink = "https://example.com/formB.html";
+      } else {
+        formLink = "https://example.com/formC.html";
+      }
+
+      document.getElementById("result").innerHTML = `<a href="${formLink}" target="_blank">Go to your form</a>`;
+    }
+  </script>
+</body>
+</html>
