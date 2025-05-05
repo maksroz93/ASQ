@@ -2,23 +2,27 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Отримати форму</title>
+  <title>Отримати анкету</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
-      background-color: #f4f4f4;
+      background-color: #f9f9f9;
     }
     h2 {
       color: #333;
     }
-    input, button {
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, select, button {
       padding: 10px;
       font-size: 1em;
-      margin: 10px 0;
+      margin-top: 5px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -27,6 +31,7 @@
       color: white;
       border: none;
       cursor: pointer;
+      margin-top: 20px;
     }
     button:hover {
       background-color: #45a049;
@@ -35,17 +40,52 @@
       margin-top: 20px;
       font-weight: bold;
     }
+    .hidden {
+      display: none;
+    }
+    .result-age {
+      margin-top: 10px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
 
-  <h2>Введіть дату народження дитини</h2>
+  <h2>Введіть дані</h2>
+
+  <label for="birthDate">Дата народження дитини:</label>
   <input type="date" id="birthDate" max="">
+
+  <label>Чи дитина народилась доношеною (гестаційний вік більше 36 тижнів)?</label>
+  <select id="termSelect" onchange="toggleGestationInput()">
+    <option value="">-- Оберіть варіант --</option>
+    <option value="yes">Так</option>
+    <option value="no">Ні</option>
+  </select>
+
+  <div id="gestationContainer" class="hidden">
+    <label for="gestationWeeks">Вкажіть термін гестації в тижнях (від 25 до 35):</label>
+    <input type="number" id="gestationWeeks" min="25" max="35">
+  </div>
+
   <button onclick="getFormLink()">Отримати форму</button>
+
   <div id="result" class="message"></div>
+  <div class="result-age" id="ageOutput"></div>
+  <div style="margin-top: 30px; font-size: 0.9em;">
+    Якщо виникають труднощі з отриманням анкети, будь ласка, сконтактуйте зі мною використовуючи пошту 
+    <a href="mailto:maksroz@gmail.com">maksroz@gmail.com</a> або в телеграм 
+    <a href="https://t.me/maksroz" target="_blank">@maksroz</a>
+  </div>
 
   <script>
     document.getElementById('birthDate').max = new Date().toISOString().split("T")[0];
+
+    function toggleGestationInput() {
+      const termSelect = document.getElementById("termSelect").value;
+      const container = document.getElementById("gestationContainer");
+      container.classList.toggle("hidden", termSelect !== "no");
+    }
 
     function calculateAge(birthDate, today) {
       let years = today.getFullYear() - birthDate.getFullYear();
@@ -54,8 +94,8 @@
 
       if (days < 0) {
         months--;
-        const previousMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        days += previousMonth.getDate();
+        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += prevMonth.getDate();
       }
 
       if (months < 0) {
@@ -64,27 +104,54 @@
       }
 
       const totalMonths = years * 12 + months;
-      return { months: totalMonths, days };
+      return { years, months, days, totalMonths };
+    }
+
+    function correctForGestation(birthDate, gestationWeeks) {
+      const correctionWeeks = 40 - gestationWeeks;
+      const correctedDate = new Date(birthDate);
+      correctedDate.setDate(correctedDate.getDate() + correctionWeeks * 7);
+      return correctedDate;
     }
 
     function getFormLink() {
       const result = document.getElementById("result");
-      const input = document.getElementById("birthDate").value;
+      const ageOutput = document.getElementById("ageOutput");
+      const birthInput = document.getElementById("birthDate").value;
+      const termValue = document.getElementById("termSelect").value;
+      const gestationWeeksInput = document.getElementById("gestationWeeks").value;
 
-      if (!input) {
-        result.textContent = "❗ Будь ласка, введіть дату народження.";
+      result.textContent = "";
+      ageOutput.textContent = "";
+
+      if (!birthInput || !termValue || (termValue === "no" && !gestationWeeksInput)) {
+        result.textContent = "❗ Будь ласка, заповніть усі поля.";
         result.style.color = "red";
         return;
       }
 
-      const birthDate = new Date(input);
+      const birthDate = new Date(birthInput);
       const today = new Date();
-      const age = calculateAge(birthDate, today);
-      const m = age.months;
-      const d = age.days;
+      let age = calculateAge(birthDate, today);
+      let correctedAge = null;
+
+      if (termValue === "no") {
+        const gestation = parseInt(gestationWeeksInput);
+        if (gestation < 25 || gestation > 35) {
+          result.textContent = "❗ Термін гестації повинен бути від 25 до 35 тижнів.";
+          result.style.color = "red";
+          return;
+        }
+        const correctedBirthDate = correctForGestation(birthDate, gestation);
+        correctedAge = calculateAge(correctedBirthDate, today);
+      }
+
+      // Determine form link based on corrected or regular age
+      const usedAge = correctedAge || age;
+      const m = usedAge.totalMonths;
+      const d = usedAge.days;
 
       let formLink = "";
-
       if (m === 11 && d >= 0 || (m === 12 && d <= 30)) formLink = "https://forms.gle/n9We9s4qmpydYXVF9";
       else if (m === 13 && d >= 0 || (m === 14 && d <= 30)) formLink = "https://forms.gle/XJGEjraB856DhCnw5";
       else if (m === 15 && d >= 0 || (m === 16 && d <= 30)) formLink = "https://forms.gle/smcoADEaJeBgLW2q8";
@@ -104,6 +171,10 @@
       if (formLink) {
         result.innerHTML = `✅ <a href="${formLink}" target="_blank">Натисніть тут, щоб перейти до форми</a>`;
         result.style.color = "green";
+        ageOutput.innerHTML = `
+          Вік дитини: ${age.years} років ${age.months} міс.<br>
+          ${correctedAge ? `Скоригований вік: ${correctedAge.years} років ${correctedAge.months} міс.` : ''}
+        `;
       } else {
         result.textContent = "На жаль, немає відповідної форми для цього віку.";
         result.style.color = "red";
